@@ -1,0 +1,58 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-android-extensions'
+
+
+buildscript {
+    ext.kotlin_version = '1.3.50'
+    repositories {
+        mavenCentral()
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+
+sourceSets {
+    main {
+        groovy {
+            srcDir '../buildSrc/src/main/groovy'
+        }
+
+        java {
+            srcDir "../buildSrc/src/main/java"
+        }
+
+        kotlin {
+            srcDir "../buildSrc/src/main/kotlin"
+        }
+
+        resources {
+            srcDir '../buildSrc/src/main/resources'
+        }
+    }
+}
+
+
+dependencies {
+    repositories {
+        mavenCentral()
+        jcenter()
+        google()
+    }
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation group: 'org.ow2.asm', name: 'asm', version: '7.1'
+    implementation group: 'org.ow2.asm', name: 'asm-commons', version: '7.1'
+    implementation 'com.android.tools.build:gradle:3.4.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
