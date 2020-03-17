@@ -2,6 +2,7 @@ package com.github.plugin
 
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.github.plugin.utils.TypeUtil
 import com.github.plugin.utils.eachFileRecurse
 import org.apache.commons.io.FileUtils
 import org.objectweb.asm.*
@@ -62,26 +63,27 @@ class ModuleTransformKt : Transform() {
                     KLogger.e("dest: $dest   file: ${file.absolutePath}")
 
 
-                    // 第一版本========
-                    val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
-                    FileUtils.touch(outputFile)
-
-                    val inputStream = FileInputStream(file)
                     // 开始织入代码，修改这些文件;
-                    val bytes = if (file.name == "MainActivity.class") {
-                        weaveSingleClassToByteArray(inputStream)//需要织入代码
-                    } else {
-                        //必须这样写，不然在transforms目录中就没有这些文件，如果是处理的目录，可以不能写出去
-                        //但是如果处理的是jar，你就必须得写出去了，不然就相当把Jar给忽略掉了
-                        inputStream.readBytes()
+                    if (TypeUtil.isMatchCondition(file.name)) {
+                        // 第一版本========
+                        val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
+                        FileUtils.touch(outputFile)
+
+                        val inputStream = FileInputStream(file)
+                        val bytes = weaveSingleClassToByteArray(inputStream)//需要织入代码
+                        //修改完毕复制到transforms的输出目录
+                        val fos = FileOutputStream(outputFile)
+                        fos.write(bytes)
+                        fos.close()
+                        inputStream.close()
                     }
-
-                    //修改完毕复制到transforms的输出目录
-                    val fos = FileOutputStream(outputFile)
-                    fos.write(bytes)
-                    fos.close()
-                    inputStream.close()
-
+//                    val bytes = if (file.name == "MainActivity.class") {
+//                        weaveSingleClassToByteArray(inputStream)//需要织入代码
+//                    } else {
+//                        //必须这样写，不然在transforms目录中就没有这些文件，如果是处理的目录，可以不能写出去
+//                        //但是如果处理的是jar，你就必须得写出去了，不然就相当把Jar给忽略掉了
+//                        inputStream.readBytes()
+//                    }
                 }
                 //这里和上面的处理是一样的，将目录中的文件复制到dest目录中
 //                FileUtils.copyDirectory(dirInput.file, dest)
@@ -112,37 +114,51 @@ class ModuleTransformKt : Transform() {
     class CustomMethodVisitor(methodVisitor: MethodVisitor?,
                               access: Int, name: String?, descriptor: String?)
         : AdviceAdapter(Opcodes.ASM7, methodVisitor, access, name, descriptor) {
+
+
+        private var isInject = false
+
+        override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor {
+            if ("Lcom/github/plugin/exalple/Inject;" == descriptor) isInject = true
+            return super.visitAnnotation(descriptor, visible)
+        }
+
         override fun onMethodEnter() {
-            //方法执行前插入
-            mv.visitLdcInsn("tag")
-            mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder")
-            mv.visitInsn(Opcodes.DUP)
-            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false)
-            mv.visitLdcInsn("-------> onCreate : ")
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
-            mv.visitVarInsn(Opcodes.ALOAD, 0)
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false)
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false)
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false)
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "i", "(Ljava/lang/String;Ljava/lang/String;)I", false)
-            mv.visitInsn(Opcodes.POP)
+            if (isInject) {
+                //方法执行前插入
+                mv.visitLdcInsn("tag")
+                mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder")
+                mv.visitInsn(Opcodes.DUP)
+                mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false)
+                mv.visitLdcInsn("-------> onCreate : ")
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
+                mv.visitVarInsn(Opcodes.ALOAD, 0)
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false)
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false)
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false)
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false)
+                mv.visitInsn(Opcodes.POP)
+            }
         }
 
         override fun onMethodExit(opcode: Int) {
-            mv.visitLdcInsn("TAG");
-        mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
-        mv.visitInsn(Opcodes.DUP);
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-        mv.visitLdcInsn("-------> onCreate aaa: ");
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "i", "(Ljava/lang/String;Ljava/lang/String;)I", false);
-        mv.visitInsn(Opcodes.POP);
+            if (isInject) {
+                mv.visitLdcInsn("tag");
+                mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
+                mv.visitInsn(Opcodes.DUP);
+                mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+                mv.visitLdcInsn("-------> onCreate aaa: ");
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "e", "(Ljava/lang/String;Ljava/lang/String;)I", false);
+                mv.visitInsn(Opcodes.POP);
+                isInject = false
+            }
         }
     }
 }
