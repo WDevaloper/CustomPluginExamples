@@ -84,6 +84,15 @@ class ModuleTransformKt : Transform() {
                 //这里和上面的处理是一样的，将目录中的文件复制到dest目录中
 //                FileUtils.copyDirectory(dirInput.file, dest)
             }
+
+
+            // TODO 多模块需要处理Jar，因为lib最后打包是已jar形式引入
+            //common\build\intermediates\runtime_library_classes\debug\classes.jar
+            //usercenter\build\intermediates\runtime_library_classes\debug\classes.jar
+            input.jarInputs.forEach { jarInput ->
+                KLogger.e("${jarInput.file.absolutePath}")
+
+            }
         }
     }
 }
