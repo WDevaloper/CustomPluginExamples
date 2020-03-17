@@ -100,7 +100,9 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
     override fun onMethodEnter() {
         KLogger.e("${ScanerCollections.size}")
         ScanerCollections.forEach { name ->
+            //加载this
             mv.visitVarInsn(ALOAD, 0)
+            //拿到类的成员变量
             mv.visitFieldInsn(GETFIELD, "com/github/plugin/exalple/test/InjectManager", "components", "Ljava/util/List;")
             //用无参构造方法创建一个组件实例
             mv.visitTypeInsn(Opcodes.NEW, name)
