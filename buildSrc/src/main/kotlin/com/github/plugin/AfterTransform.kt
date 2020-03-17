@@ -85,13 +85,26 @@ class AfterTransform : Transform() {
 }
 
 class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM7, classVisitor) {
+    //如果是实现了IComponent接口的话，将所有组件类收集起来，通过修改字节码的方式生成注册代码到组件管理类中
+    override fun visit(version: Int, access: Int, name: String?, signature: String?, superName: String?, interfaces: Array<out String>?) {
+        if (interfaces?.contains(MATCH_CLASS) == true && name != "") ScanerCollections.add("$name")
+        super.visit(version, access, name, signature, superName, interfaces)
+    }
+
     override fun visitMethod(access: Int, name: String, descriptor: String, signature: String?, exceptions: Array<out String>?): MethodVisitor {
         KLogger.e("name:$name     descriptor:$descriptor")
+
         val visitMethod = super.visitMethod(access, name, descriptor, signature, exceptions)
-        if ("init" != name) {
+        if (MATCH_METHOD_INIT_COMPONENT != name) {
             return visitMethod
         }
         return CustomScannerMethod(visitMethod, access, name, descriptor)
+    }
+
+
+    companion object {
+        const val MATCH_CLASS = "com.github.plugin.common.IComponent"
+        const val MATCH_METHOD_INIT_COMPONENT = "initComponent"
     }
 }
 
@@ -103,7 +116,7 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
             //加载this
             mv.visitVarInsn(ALOAD, 0)
             //拿到类的成员变量
-            mv.visitFieldInsn(GETFIELD, "com/github/plugin/exalple/test/InjectManager", "components", "Ljava/util/List;")
+            mv.visitFieldInsn(GETFIELD, MATCH_MANAGER_CLASS, "components", "Ljava/util/List;")
             //用无参构造方法创建一个组件实例
             mv.visitTypeInsn(Opcodes.NEW, name)
             mv.visitInsn(Opcodes.DUP)
@@ -111,5 +124,9 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
             mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true)
             mv.visitInsn(POP)
         }
+    }
+
+    companion object {
+        const val MATCH_MANAGER_CLASS = "com.github.plugin.common.InjectManager"
     }
 }

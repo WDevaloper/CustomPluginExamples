@@ -1,4 +1,4 @@
-package com.github.plugin.exalple.test;
+package com.github.plugin.common;
 
 public interface IComponent {
     void onCreate();

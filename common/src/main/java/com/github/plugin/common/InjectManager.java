@@ -1,4 +1,4 @@
-package com.github.plugin.exalple.test;
+package com.github.plugin.common;
 
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class InjectManager {
     }
 
 
-    public void init() {
+    public void initComponent() {
     }
 
 

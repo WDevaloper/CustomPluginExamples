@@ -5,9 +5,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.github.plugin.exalple.test.IComponent;
-import com.github.plugin.exalple.test.IComponentImol;
-import com.github.plugin.exalple.test.InjectManager;
+import com.github.plugin.common.IComponent;
+import com.github.plugin.common.InjectManager;
+
 
 public class MainActivity extends Activity {
 
@@ -18,8 +18,8 @@ public class MainActivity extends Activity {
         testAsm();
 
         InjectManager instance = InjectManager.getInstance();
-        instance.init();
-        for (IComponent component :instance.getComponents()) {
+        instance.initComponent();
+        for (IComponent component : instance.getComponents()) {
             component.onCreate();
         }
     }
@@ -30,10 +30,5 @@ public class MainActivity extends Activity {
         for (int i = 0; i < 10; i++) {
             Log.e("tag", "i = " + i);
         }
-    }
-
-    private void test() {
-        IComponentImol iComponentImol = new IComponentImol();
-        InjectManager.getInstance().getComponents().add(iComponentImol);
     }
 }
