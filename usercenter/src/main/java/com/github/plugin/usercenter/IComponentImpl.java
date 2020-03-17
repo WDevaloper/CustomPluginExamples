@@ -4,9 +4,9 @@ import android.util.Log;
 
 import com.github.plugin.common.IComponent;
 
-public class UserComponent implements IComponent {
+public class IComponentImpl implements IComponent {
     @Override
     public void onCreate() {
-        Log.e("tag","UserComponent");
+        Log.e("tag","IComponentImpl");
     }
 }

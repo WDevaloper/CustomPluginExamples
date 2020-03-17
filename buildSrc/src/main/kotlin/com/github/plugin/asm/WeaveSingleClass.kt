@@ -2,10 +2,10 @@ package com.github.plugin.asm
 
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import java.io.FileInputStream
+import java.io.InputStream
 
 object WeaveSingleClass {
-    fun weaveSingleClassToByteArray(inputStream: FileInputStream): ByteArray {
+    fun weaveSingleClassToByteArray(inputStream: InputStream): ByteArray {
 
         //1、解析字节码
         val classReader = ClassReader(inputStream)

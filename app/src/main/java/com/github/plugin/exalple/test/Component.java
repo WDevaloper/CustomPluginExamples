@@ -5,9 +5,9 @@ import android.util.Log;
 
 import com.github.plugin.common.IComponent;
 
-public class AppComponent implements IComponent {
+public class Component implements IComponent {
     @Override
     public void onCreate() {
-        Log.e("tag","AppComponent");
+        Log.e("tag","Component");
     }
 }

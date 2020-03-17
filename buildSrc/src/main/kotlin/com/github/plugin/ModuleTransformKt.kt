@@ -5,14 +5,17 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.github.plugin.asm.CustomInjectClassVisitor
 import com.github.plugin.asm.WeaveSingleClass
 import com.github.plugin.utils.TypeUtil
+import com.github.plugin.utils.ZipFileUtils
 import com.github.plugin.utils.eachFileRecurse
+import com.github.plugin.utils.getUniqueJarName
 import org.apache.commons.io.FileUtils
 import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
 import java.nio.file.Files
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 
 //Android Gradle Transform
@@ -39,10 +42,7 @@ class ModuleTransformKt : Transform() {
             transformInvocation.outputProvider.deleteAll()
         }
 
-
         transformInvocation.inputs.forEach { input ->
-
-
             input.directoryInputs.forEach { dirInput ->
                 //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ModuleTransformKt\debug\0目录中
                 val dest = transformInvocation.outputProvider.getContentLocation(dirInput.name,
@@ -90,8 +90,60 @@ class ModuleTransformKt : Transform() {
             //common\build\intermediates\runtime_library_classes\debug\classes.jar
             //usercenter\build\intermediates\runtime_library_classes\debug\classes.jar
             input.jarInputs.forEach { jarInput ->
-                KLogger.e("${jarInput.file.absolutePath}")
+                val dest = transformInvocation.outputProvider.getContentLocation(
+                        jarInput.file.getUniqueJarName(),
+                        jarInput.contentTypes,
+                        jarInput.scopes,
+                        Format.JAR)
+                weaveJarTask(jarInput.file, dest)
+            }
+        }
+    }
 
+
+    private fun weaveJarTask(input: File, output: File) {
+        //input: build\intermediates\runtime_library_classes\debug\classes.jar
+        //output: build\intermediates\transforms\ModuleTransformKt\debug\0.jar
+        KLogger.e("input: ${input.absolutePath}  output: ${output.absolutePath}")
+        var zipOutputStream: ZipOutputStream? = null
+        var zipFile: ZipFile? = null
+        try {
+            zipOutputStream = ZipOutputStream(BufferedOutputStream(Files.newOutputStream(output.toPath())))
+            zipFile = ZipFile(input)
+            val enumeration = zipFile.entries()
+
+            while (enumeration.hasMoreElements()) {
+                val zipEntry = enumeration.nextElement()
+                val zipEntryName = zipEntry.name
+                //jar文件里面就是class文件的了
+                // com/github/plugin/usercenter/UserComponent.class
+                // com/github/plugin/common/BuildConfig.class
+                KLogger.e("zipEntryName:$zipEntryName")
+                if (TypeUtil.isMatchCondition(zipEntryName)) {
+
+                    val data = WeaveSingleClass.weaveSingleClassToByteArray(BufferedInputStream(zipFile.getInputStream(zipEntry)))
+
+                    val byteArrayInputStream = ByteArrayInputStream(data)
+
+                    val newZipEntry = ZipEntry(zipEntryName)
+                    ZipFileUtils.addZipEntry(zipOutputStream, newZipEntry, byteArrayInputStream)
+                } else {
+                    val inputStream = zipFile.getInputStream(zipEntry)
+                    val newZipEntry = ZipEntry(zipEntryName)
+                    ZipFileUtils.addZipEntry(zipOutputStream, newZipEntry, inputStream)
+                }
+            }
+        } catch (e: Exception) {
+        } finally {
+            try {
+                if (zipOutputStream != null) {
+                    zipOutputStream.finish()
+                    zipOutputStream.flush()
+                    zipOutputStream.close()
+                }
+                zipFile?.close()
+            } catch (e: Exception) {
+                KLogger.e("close stream err!")
             }
         }
     }

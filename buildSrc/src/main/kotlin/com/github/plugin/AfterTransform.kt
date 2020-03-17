@@ -9,14 +9,18 @@ import com.github.plugin.asm.CustomInjectClassVisitor
 import com.github.plugin.asm.ExtendClassWriter
 import com.github.plugin.asm.WeaveSingleClass
 import com.github.plugin.utils.TypeUtil
+import com.github.plugin.utils.ZipFileUtils
 import com.github.plugin.utils.eachFileRecurse
+import com.github.plugin.utils.getUniqueJarName
 import org.apache.commons.io.FileUtils
 import org.gradle.internal.impldep.aQute.bnd.osgi.OpCodes
 import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
+import java.nio.file.Files
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 class AfterTransform : Transform() {
     override fun getName(): String {
@@ -66,10 +70,68 @@ class AfterTransform : Transform() {
                     }
                 }
             }
+            input.jarInputs.forEach { jarInput ->
+                val dest = transformInvocation.outputProvider.getContentLocation(
+                        jarInput.file.getUniqueJarName(),
+                        jarInput.contentTypes,
+                        jarInput.scopes,
+                        Format.JAR)
+                FileUtils.copyFile(jarInput.file, dest)
+                weaveJarTask(jarInput.file, dest)
+            }
+
         }
     }
 
-    private fun weaveSingleClassToByteArray2(inputStream: FileInputStream): ByteArray {
+
+    private fun weaveJarTask(input: File, output: File) {
+        //input: build\intermediates\runtime_library_classes\debug\classes.jar
+        //output: build\intermediates\transforms\ModuleTransformKt\debug\0.jar
+        KLogger.e("input: ${input.absolutePath}  output: ${output.absolutePath}")
+        var zipOutputStream: ZipOutputStream? = null
+        var zipFile: ZipFile? = null
+        try {
+            zipOutputStream = ZipOutputStream(BufferedOutputStream(Files.newOutputStream(output.toPath())))
+            zipFile = ZipFile(input)
+            val enumeration = zipFile.entries()
+
+            while (enumeration.hasMoreElements()) {
+                val zipEntry = enumeration.nextElement()
+                val zipEntryName = zipEntry.name
+                //jar文件里面就是class文件的了
+                // com/github/plugin/usercenter/UserComponent.class
+                // com/github/plugin/common/BuildConfig.class
+                KLogger.e("zipEntryName:$zipEntryName")
+                if (TypeUtil.isMatchCondition(zipEntryName)) {
+
+                    val data = weaveSingleClassToByteArray2(BufferedInputStream(zipFile.getInputStream(zipEntry)))
+
+                    val byteArrayInputStream = ByteArrayInputStream(data)
+
+                    val newZipEntry = ZipEntry(zipEntryName)
+                    ZipFileUtils.addZipEntry(zipOutputStream, newZipEntry, byteArrayInputStream)
+                } else {
+                    val inputStream = zipFile.getInputStream(zipEntry)
+                    val newZipEntry = ZipEntry(zipEntryName)
+                    ZipFileUtils.addZipEntry(zipOutputStream, newZipEntry, inputStream)
+                }
+            }
+        } catch (e: Exception) {
+        } finally {
+            try {
+                if (zipOutputStream != null) {
+                    zipOutputStream.finish()
+                    zipOutputStream.flush()
+                    zipOutputStream.close()
+                }
+                zipFile?.close()
+            } catch (e: Exception) {
+                KLogger.e("close stream err!")
+            }
+        }
+    }
+
+    private fun weaveSingleClassToByteArray2(inputStream: InputStream): ByteArray {
 
         //1、解析字节码
         val classReader = ClassReader(inputStream)
@@ -87,6 +149,7 @@ class AfterTransform : Transform() {
 class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM7, classVisitor) {
     //如果是实现了IComponent接口的话，将所有组件类收集起来，通过修改字节码的方式生成注册代码到组件管理类中
     override fun visit(version: Int, access: Int, name: String?, signature: String?, superName: String?, interfaces: Array<out String>?) {
+        KLogger.e("${interfaces?.joinToString { it }}")
         if (interfaces?.contains(MATCH_CLASS) == true && name != "") ScanerCollections.add("$name")
         super.visit(version, access, name, signature, superName, interfaces)
     }
@@ -103,7 +166,7 @@ class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
 
 
     companion object {
-        const val MATCH_CLASS = "com.github.plugin.common.IComponent"
+        const val MATCH_CLASS = "com/github/plugin/common/IComponent"
         const val MATCH_METHOD_INIT_COMPONENT = "initComponent"
     }
 }
