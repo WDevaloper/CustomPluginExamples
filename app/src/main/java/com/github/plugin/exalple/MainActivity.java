@@ -21,4 +21,8 @@ public class MainActivity extends Activity {
             Log.e("tag", "i = " + i);
         }
     }
+
+
+    private void test() {
+    }
 }

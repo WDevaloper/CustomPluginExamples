@@ -116,6 +116,7 @@ class ModuleTransformKt : Transform() {
         : AdviceAdapter(Opcodes.ASM7, methodVisitor, access, name, descriptor) {
 
 
+        //满足指定注解的方法，才会织入代码
         private var isInject = false
 
         override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor {
