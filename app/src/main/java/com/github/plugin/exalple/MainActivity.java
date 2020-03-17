@@ -5,6 +5,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.github.plugin.exalple.test.IComponent;
+import com.github.plugin.exalple.test.IComponentImol;
+import com.github.plugin.exalple.test.InjectManager;
+
 public class MainActivity extends Activity {
 
     @Override
@@ -12,6 +16,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         testAsm();
+
+        InjectManager instance = InjectManager.getInstance();
+        instance.init();
+        for (IComponent component :instance.getComponents()) {
+            component.onCreate();
+        }
     }
 
 
@@ -22,7 +32,8 @@ public class MainActivity extends Activity {
         }
     }
 
-
     private void test() {
+        IComponentImol iComponentImol = new IComponentImol();
+        InjectManager.getInstance().getComponents().add(iComponentImol);
     }
 }

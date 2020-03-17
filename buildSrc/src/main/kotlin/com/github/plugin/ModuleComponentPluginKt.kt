@@ -20,8 +20,7 @@ class ModuleComponentPluginKt : Plugin<Project> {
             project.gradle.addListener(BuildTimeListener())
             val android = project.extensions.getByType(AppExtension::class.java)
             android.registerTransform(ModuleTransformKt())
+            android.registerTransform(AfterTransform())
         }
-
-
     }
 }
