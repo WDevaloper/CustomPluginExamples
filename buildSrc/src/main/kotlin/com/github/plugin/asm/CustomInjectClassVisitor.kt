@@ -5,18 +5,18 @@ import org.objectweb.asm.commons.AdviceAdapter
 
 //访问类,主要是为了注入一些统计信息到方法上的
 class CustomInjectClassVisitor(classWriter: ClassWriter) : ClassVisitor(Opcodes.ASM7, classWriter) {
-    override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?): MethodVisitor {
+    override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?,
+                             exceptions: Array<out String>?): MethodVisitor {
         val visitMethod = super.visitMethod(access, name, descriptor, signature, exceptions)
         return CustomMethodVisitor(visitMethod, access, name, descriptor)
     }
 }
 
 //访问类的方法
-class CustomMethodVisitor(methodVisitor: MethodVisitor?,
-                          access: Int, name: String?, descriptor: String?)
-    : AdviceAdapter(Opcodes.ASM7, methodVisitor, access, name, descriptor) {
+class CustomMethodVisitor(methodVisitor: MethodVisitor?, access: Int, name: String?, descriptor: String?) :
+        AdviceAdapter(Opcodes.ASM7, methodVisitor, access, name, descriptor) {
 
-    //满足指定注解的方法，才会织入代码
+    //满足指定注解{@Inject}的方法，才会织入代码
     private var isInjectMethod = false
 
     override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor {
@@ -31,7 +31,7 @@ class CustomMethodVisitor(methodVisitor: MethodVisitor?,
             mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder")
             mv.visitInsn(Opcodes.DUP)
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false)
-            mv.visitLdcInsn("-------> onCreate : ")
+            mv.visitLdcInsn(">>>>>>inject method: $name >>>>> for Class Name: ")
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
             mv.visitVarInsn(Opcodes.ALOAD, 0)
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false)
@@ -49,9 +49,9 @@ class CustomMethodVisitor(methodVisitor: MethodVisitor?,
             mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder")
             mv.visitInsn(Opcodes.DUP);
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false)
-            mv.visitLdcInsn("-------> onCreate aaa: ")
+            mv.visitLdcInsn(">>>>> $name >>>>> for Class Name: ")
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
-            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitVarInsn(Opcodes.ALOAD, 0)
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false)
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false)
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false)
