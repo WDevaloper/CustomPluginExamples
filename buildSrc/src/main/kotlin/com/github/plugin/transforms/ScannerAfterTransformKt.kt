@@ -18,7 +18,7 @@ import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
-class ScannerAfterTransform : Transform() {
+class ScannerAfterTransformKt : Transform() {
     override fun getName(): String {
         return "scanner_component_after"
     }
@@ -37,7 +37,7 @@ class ScannerAfterTransform : Transform() {
 
 
     override fun transform(transformInvocation: TransformInvocation) {
-        KLogger.e(">>>>>>>>>>>>>ScannerAfterTransform")
+        KLogger.e(">>>>>>>>>>>>>ScannerAfterTransformKt")
 
         if (!transformInvocation.isIncremental) {
             transformInvocation.outputProvider.deleteAll()

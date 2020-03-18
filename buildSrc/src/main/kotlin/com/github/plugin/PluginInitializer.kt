@@ -14,7 +14,8 @@ object PluginInitializer {
             throw  GradleException("Component: The 'com.android.application' or 'com.android.library' plugin is required.")
         }
         this.project = project
-        project.extensions.create(COMPONENT_CONFIG_NAME, ComponentExtension::class.java)  //创建extensions
+        //  创建extensions  ，可以通过extensions.getByType拿到这个拓展对象
+        project.extensions.create(COMPONENT_CONFIG_NAME, ComponentExtension::class.java)
     }
 
     private fun getComponentConfig(): ComponentExtension = project.extensions.getByType(ComponentExtension::class.java)
