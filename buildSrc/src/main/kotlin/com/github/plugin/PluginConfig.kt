@@ -20,4 +20,18 @@ object PluginConfig {
     fun getComponentConfig(): ComponentConfig {
         return project.extensions.getByType(ComponentConfig::class.java)
     }
+
+
+    fun getComponentInterfaceName(): String {
+        return getComponentConfig().matcherInterfaceType.replace(".", "/")
+    }
+
+    fun getComponentManagerTypeName(): String {
+        return getComponentConfig().matcherManagerType.replace(".", "/")
+    }
+
+    fun getComponentManagerTypeInitMethodName(): String {
+        return getComponentConfig().matcherManagerTypeMethod
+    }
+
 }

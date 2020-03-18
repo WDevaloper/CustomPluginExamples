@@ -2,6 +2,7 @@ package com.github.plugin
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
+import com.github.plugin.inject.AfterTransform
 import com.github.plugin.intener.BuildTimeListener
 import org.gradle.api.Plugin
 import org.gradle.api.Project

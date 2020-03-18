@@ -16,10 +16,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         testAsm();
-
-        InjectManager instance = InjectManager.getInstance();
-        instance.initComponent();
-        for (IComponent component : instance.getComponents()) {
+        for (IComponent component : InjectManager.getInstance().getComponents()) {
             component.onCreate();
         }
     }

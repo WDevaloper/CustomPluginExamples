@@ -25,13 +25,6 @@ public class InjectManager {
 
 
     public synchronized void initComponent() {
-        components.clear();
-        this.components.add(new IComponent() {
-            @Override
-            public void onCreate() {
-
-            }
-        });
     }
 
 
