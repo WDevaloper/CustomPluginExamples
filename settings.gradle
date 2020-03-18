@@ -1,2 +1,2 @@
-include ':app', ':buildSrc', ':usercenter', ':common'
+include ':app', ':buildSrc', ':usercenter', ':common', ':ordercenter'
 rootProject.name='CustomPluginExalple'
