@@ -2,6 +2,12 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'moduleComponent'
 
+componentExt {
+    matcherInterfaceType "com.github.plugin.common.IComponent"
+    matcherManagerType "com.github.plugin.common.InjectManager"
+    matcherManagerTypeMethod "initComponent"
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -18,8 +24,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 }
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':common')
+    implementation project(path: ':usercenter')
+    implementation project(path: ':ordercenter')
 }
