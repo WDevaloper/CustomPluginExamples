@@ -2,12 +2,15 @@ package com.github.plugin
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.internal.LoggerWrapper
+import com.android.build.gradle.internal.transforms.InstantRunVerifierTransform
 import com.github.plugin.intener.BuildTimeListener
 import com.github.plugin.transforms.ScannerAfterTransformKt
 import com.github.plugin.transforms.ScannerComponentTransformKt
 import com.github.plugin.utils.KLogger
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.logging.Logging
 
 
 //注意点：1、使用ASM时，一定要注意asm 字节码格式写对，不然很难找到出错的原因

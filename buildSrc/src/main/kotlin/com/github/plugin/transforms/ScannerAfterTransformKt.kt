@@ -83,6 +83,9 @@ class ScannerAfterTransformKt : Transform() {
                         val jarEntry = enumeration.nextElement() as JarEntry
                         val entryName = jarEntry.name
                         val zipEntry = ZipEntry(entryName)
+
+                        if (zipEntry.isDirectory) continue
+
                         val inputStream = jarFile.getInputStream(jarEntry)
                         //插桩class
                         if (TypeUtil.isMatchCondition(entryName)) {

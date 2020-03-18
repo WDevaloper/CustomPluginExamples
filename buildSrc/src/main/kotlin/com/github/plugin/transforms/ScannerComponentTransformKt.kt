@@ -50,9 +50,7 @@ class ScannerComponentTransformKt : Transform() {
                 //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ScannerComponentTransformKt\debug\0目录中
                 // name就是会在__content__.json文件中的name，唯一的
                 val dest = transformInvocation.outputProvider.getContentLocation(DigestUtils.md5Hex(dirInput.name),
-                        dirInput.contentTypes,
-                        dirInput.scopes,
-                        Format.DIRECTORY).also(FileUtils::forceMkdir)
+                        dirInput.contentTypes, dirInput.scopes, Format.DIRECTORY).also(FileUtils::forceMkdir)
 
                 //1、遍历目录中的文件;
                 //2、修改这些文件;
@@ -105,9 +103,12 @@ class ScannerComponentTransformKt : Transform() {
 
                     //用于保存JAR文件，修改JAR中的class
                     while (enumeration.hasMoreElements()) {
-                        val jarEntry = enumeration.nextElement() as JarEntry
+                        val jarEntry = enumeration.nextElement()
                         val entryName = jarEntry.name
                         val zipEntry = ZipEntry(entryName)
+
+                        if (zipEntry.isDirectory) continue
+
                         val inputStream = jarFile.getInputStream(jarEntry)
                         //插桩class
                         if (TypeUtil.isMatchCondition(entryName)) {
@@ -136,9 +137,9 @@ class ScannerComponentTransformKt : Transform() {
                             jarInput.contentTypes, jarInput.scopes, Format.JAR)
 
                     //input: build\intermediates\runtime_library_classes\debug\classes.jar
-                    //output: build\intermediates\transforms\ScannerComponentTransformKt\debug\0.jar
-                    //KLogger.e("input: ${jarInput.file.absolutePath}  output: ${dest.absolutePath}")
-                    //KLogger.e("${jarInput.name}   $jarName     ${jarName + md5Name}")
+                    //                    //output: build\intermediates\transforms\ScannerComponentTransformKt\debug\0.jar
+                    //                    //KLogger.e("input: ${jarInput.file.absolutePath}  output: ${dest.absolutePath}")
+                    //                    //KLogger.e("${jarInput.name}   $jarName     ${jarName + md5Name}")
 
                     FileUtils.copyFile(tmpFile, dest)
                     tmpFile.delete()
