@@ -12,12 +12,17 @@ import com.github.plugin.utils.TypeUtil
 import com.github.plugin.utils.ZipFileUtils
 import com.github.plugin.utils.eachFileRecurse
 import com.github.plugin.utils.getUniqueJarName
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
 import org.gradle.internal.impldep.aQute.bnd.osgi.OpCodes
 import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
 import java.io.*
 import java.nio.file.Files
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -53,7 +58,7 @@ class AfterTransform : Transform() {
 
             input.directoryInputs.forEach { dirInput ->
                 //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ModuleTransformKt\debug\0目录中
-                val dest = transformInvocation.outputProvider.getContentLocation(dirInput.name,
+                val dest = transformInvocation.outputProvider.getContentLocation(DigestUtils.md5Hex(dirInput.name),
                         dirInput.contentTypes,
                         dirInput.scopes,
                         Format.DIRECTORY).also(FileUtils::forceMkdir)
@@ -68,6 +73,59 @@ class AfterTransform : Transform() {
                         fos.close()
                         inputStream.close()
                     }
+                }
+            }
+
+
+            input.jarInputs.forEach { jarInput ->
+                if (jarInput.file.absolutePath.endsWith(".jar")) {
+                    val jarFile = JarFile(jarInput.file)
+                    val enumeration = jarFile.entries()
+
+                    //用于存放临时操作的class文件，当操作完毕，便将临时文件拷贝到dest文件即可
+                    val tmpFile = File(jarInput.file.parent + File.separator + "classes_temp.jar")
+                    if (tmpFile.exists()) tmpFile.delete() //避免上次的缓存被重复插入
+                    val tmpJarOutputStream = JarOutputStream(FileOutputStream(tmpFile))
+
+                    //用于保存JAR文件，修改JAR中的class
+                    while (enumeration.hasMoreElements()) {
+                        val jarEntry = enumeration.nextElement() as JarEntry
+                        val entryName = jarEntry.name
+                        val zipEntry = ZipEntry(entryName)
+                        val inputStream = jarFile.getInputStream(jarEntry)
+                        //插桩class
+                        if (TypeUtil.isMatchCondition(entryName)) {
+                            KLogger.e("ASM 开始处理Jar文件中${entryName}文件")
+                            tmpJarOutputStream.putNextEntry(zipEntry)
+                            val updateCodeBytes = weaveSingleClassToByteArray2(inputStream)
+                            tmpJarOutputStream.write(updateCodeBytes)
+                            KLogger.e("ASM 结束处理Jar文件中${entryName}文件")
+                        } else {
+                            KLogger.e("不满足条件Jar文件中${entryName}文件")
+                            tmpJarOutputStream.putNextEntry(zipEntry)
+                            tmpJarOutputStream.write(IOUtils.toByteArray(inputStream))
+                        }
+                        tmpJarOutputStream.closeEntry()
+                    }
+                    //结束
+                    tmpJarOutputStream.close()
+                    jarFile.close()
+
+                    // 将临时class文件拷贝到目标dest文件
+                    var jarName = jarInput.name//重名名输出文件,因为可能同名,会覆盖
+                    val md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)
+                    //截取.jar，即 去掉.jar
+                    if (jarName.endsWith(".jar")) jarName = jarName.substring(0, jarName.length - 4)
+                    val dest = transformInvocation.outputProvider.getContentLocation(jarName + md5Name,
+                            jarInput.contentTypes, jarInput.scopes, Format.JAR)
+
+                    //input: build\intermediates\runtime_library_classes\debug\classes.jar
+                    //output: build\intermediates\transforms\ModuleTransformKt\debug\0.jar
+                    //KLogger.e("input: ${jarInput.file.absolutePath}  output: ${dest.absolutePath}")
+                    //KLogger.e("${jarInput.name}   $jarName     ${jarName + md5Name}")
+
+                    FileUtils.copyFile(tmpFile, dest)
+                    tmpFile.delete()
                 }
             }
         }
@@ -118,6 +176,7 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
     override fun onMethodEnter() {
         KLogger.e("${ScanerCollections.size}")
         ScanerCollections.forEach { name ->
+            KLogger.e(">><<<>>>>>>${name}")
             //加载this
             mv.visitVarInsn(ALOAD, 0)
             //拿到类的成员变量
@@ -132,6 +191,7 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
     }
 
     companion object {
-        const val MATCH_MANAGER_CLASS = "com.github.plugin.common.InjectManager"
+        //坑，你需要注意的类名不要写错了
+        const val MATCH_MANAGER_CLASS = "com/github/plugin/common/InjectManager"
     }
 }
