@@ -2,6 +2,12 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'moduleComponent'
 
+componentConfig {
+    matcherInterfaceType "com.github.plugin.common.IComponent"
+    matcherManagerTypeMethod "initComponent"
+    matcherManagerType "com.github.plugin.common.InjectManager"
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"

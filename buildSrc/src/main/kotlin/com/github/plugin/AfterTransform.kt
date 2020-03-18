@@ -150,7 +150,7 @@ class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
     //如果是实现了IComponent接口的话，将所有组件类收集起来，通过修改字节码的方式生成注册代码到组件管理类中
     override fun visit(version: Int, access: Int, name: String?, signature: String?, superName: String?, interfaces: Array<out String>?) {
         KLogger.e("${interfaces?.joinToString { it }}")
-        if (interfaces?.contains(MATCH_CLASS) == true && name != "") ScanerCollections.add("$name")
+        if (interfaces?.contains(PluginConfig.getComponentConfig().matcherInterfaceType.replace(".", "/")) == true && name != "") ScanerCollections.add("$name")
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
@@ -158,17 +158,10 @@ class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
         KLogger.e("name:$name     descriptor:$descriptor")
 
         val visitMethod = super.visitMethod(access, name, descriptor, signature, exceptions)
-        if (MATCH_METHOD_INIT_COMPONENT != name) {
+        if (PluginConfig.getComponentConfig().matcherManagerTypeMethod != name) {
             return visitMethod
         }
         return CustomScannerMethod(visitMethod, access, name, descriptor)
-    }
-
-
-    companion object {
-        //坑，你需要注意的类名不要写错了
-        const val MATCH_CLASS = "com/github/plugin/common/IComponent"
-        const val MATCH_METHOD_INIT_COMPONENT = "initComponent"
     }
 }
 
@@ -180,8 +173,8 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
             KLogger.e(">><<<>>>>>>${name}")
             //加载this
             mv.visitVarInsn(ALOAD, 0)
-            //拿到类的成员变量
-            mv.visitFieldInsn(GETFIELD, MATCH_MANAGER_CLASS, "components", "Ljava/util/List;")
+            //拿到类的成员变量     坑，你需要注意的类名不要写错了
+            mv.visitFieldInsn(GETFIELD, PluginConfig.getComponentConfig().matcherManagerType.replace(".", "/"), "components", "Ljava/util/List;")
             //用无参构造方法创建一个组件实例
             mv.visitTypeInsn(Opcodes.NEW, name)
             mv.visitInsn(Opcodes.DUP)
@@ -189,10 +182,5 @@ class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: Stri
             mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true)
             mv.visitInsn(POP)
         }
-    }
-
-    companion object {
-        //坑，你需要注意的类名不要写错了
-        const val MATCH_MANAGER_CLASS = "com/github/plugin/common/InjectManager"
     }
 }

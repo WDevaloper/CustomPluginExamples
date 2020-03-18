@@ -14,9 +14,12 @@ class ModuleComponentPluginKt : Plugin<Project> {
         this.mProject = project
         KLogger.inject(project.logger)
         KLogger.e("自定义插件ModuleComponentPluginKt")
+        //创建extensions
+        project.extensions.create(PluginConfig.COMPONENT_CONFIG, ComponentConfig::class.java)
+        PluginConfig.init(project)
 
         if (project.plugins.hasPlugin(AppPlugin::class.java)) {
-            //监听每个任务的执行时间
+            // 监听每个任务的执行时间
             project.gradle.addListener(BuildTimeListener())
             val android = project.extensions.getByType(AppExtension::class.java)
             android.registerTransform(ModuleTransformKt())
