@@ -1,4 +1,4 @@
-package com.github.plugin
+package com.github.plugin.transforms
 
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.QualifiedContent
@@ -6,6 +6,7 @@ import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.github.plugin.asm.WeaveSingleClass
+import com.github.plugin.utils.KLogger
 import com.github.plugin.utils.TypeUtil
 import com.github.plugin.utils.eachFileRecurse
 import org.apache.commons.codec.digest.DigestUtils
@@ -21,9 +22,9 @@ import java.util.zip.ZipEntry
 
 
 //Android Gradle Transform
-class ModuleTransformKt : Transform() {
+class ScannerComponentTransformKt : Transform() {
     override fun getName(): String {
-        return ModuleTransformKt::class.simpleName ?: ""
+        return "scanner_component_result"
     }
 
     override fun getInputTypes(): MutableSet<QualifiedContent.ContentType> {
@@ -46,7 +47,7 @@ class ModuleTransformKt : Transform() {
 
         transformInvocation.inputs.forEach { input ->
             input.directoryInputs.forEach { dirInput ->
-                //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ModuleTransformKt\debug\0目录中
+                //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ScannerComponentTransformKt\debug\0目录中
                 // name就是会在__content__.json文件中的name，唯一的
                 val dest = transformInvocation.outputProvider.getContentLocation(DigestUtils.md5Hex(dirInput.name),
                         dirInput.contentTypes,
@@ -59,7 +60,7 @@ class ModuleTransformKt : Transform() {
                 // 就会被打包到apk中呢？因为我们自定义的transforms会优先于其他transform执行并且是优先于其他的执行，详细的
                 //可以去看看BaseExtension的构造方法
                 dirInput.file.eachFileRecurse { file ->
-                    // dest===> transforms\ModuleTransformKt\debug\0 D8编译成dex文件
+                    // dest===> transforms\ScannerComponentTransformKt\debug\0 D8编译成dex文件
                     // file===> build\intermediates\javac\debug\compileDebugJavaWithJavac\classes\com\github\plugin\examlple\MainActivity.class javac 编译生成的字节码
 
 
@@ -69,9 +70,9 @@ class ModuleTransformKt : Transform() {
                         val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
                         FileUtils.touch(outputFile)
 
-                        //Dest目录: build\intermediates\transforms\ModuleTransformKt\debug\0
+                        //Dest目录: build\intermediates\transforms\ScannerComponentTransformKt\debug\0
                         //输入文件:  build\intermediates\javac\debug\compileDebugJavaWithJavac\classes\com\github\plugin\examlple\Inject.class
-                        //输出文件： build\intermediates\transforms\ModuleTransformKt\debug\0\com\github\plugin\exalple\Inject.class
+                        //输出文件： build\intermediates\transforms\ScannerComponentTransformKt\debug\0\com\github\plugin\exalple\Inject.class
                         KLogger.e("inputFile: ${file.absolutePath}   outputFile: ${outputFile.absolutePath}   destFile: ${dest.absolutePath}")
 
                         val inputStream = FileInputStream(file)
@@ -135,7 +136,7 @@ class ModuleTransformKt : Transform() {
                             jarInput.contentTypes, jarInput.scopes, Format.JAR)
 
                     //input: build\intermediates\runtime_library_classes\debug\classes.jar
-                    //output: build\intermediates\transforms\ModuleTransformKt\debug\0.jar
+                    //output: build\intermediates\transforms\ScannerComponentTransformKt\debug\0.jar
                     //KLogger.e("input: ${jarInput.file.absolutePath}  output: ${dest.absolutePath}")
                     //KLogger.e("${jarInput.name}   $jarName     ${jarName + md5Name}")
 

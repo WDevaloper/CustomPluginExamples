@@ -1,8 +1,8 @@
 package com.github.plugin.asm
 
-import com.github.plugin.KLogger
-import com.github.plugin.PluginConfig
-import com.github.plugin.ScanerCollections
+import com.github.plugin.utils.KLogger
+import com.github.plugin.PluginInitializer
+import com.github.plugin.ComponentNameCollection
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -11,7 +11,7 @@ class AutoInjectComponentClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
     //如果是实现了IComponent接口的话，将所有组件类收集起来，通过修改字节码的方式生成注册代码到组件管理类中
     override fun visit(version: Int, access: Int, name: String?, signature: String?, superName: String?, interfaces: Array<out String>?) {
         KLogger.e("${interfaces?.joinToString { it }}")
-        if (interfaces?.contains(PluginConfig.getComponentInterfaceName()) == true && name != "") ScanerCollections.add("$name")
+        if (interfaces?.contains(PluginInitializer.getComponentInterfaceName()) == true && name != "") ComponentNameCollection.add("$name")
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
@@ -19,7 +19,7 @@ class AutoInjectComponentClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
         KLogger.e("name:$name     descriptor:$descriptor")
 
         val visitMethod = super.visitMethod(access, name, descriptor, signature, exceptions)
-        if (PluginConfig.getComponentManagerTypeInitMethodName() != name) {
+        if (PluginInitializer.getComponentManagerTypeInitMethodName() != name) {
             return visitMethod
         }
         return AutoInjectComponentMethodVisitor(visitMethod, access, name, descriptor)

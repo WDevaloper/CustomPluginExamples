@@ -1,6 +1,6 @@
 package com.github.plugin.intener
 
-import com.github.plugin.KLogger
+import com.github.plugin.utils.KLogger
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.Task

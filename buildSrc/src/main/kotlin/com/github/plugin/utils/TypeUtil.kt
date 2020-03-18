@@ -1,6 +1,5 @@
 package com.github.plugin.utils
 
-import com.github.plugin.KLogger
 import com.github.plugin.asm.WeaveSingleClass
 import org.objectweb.asm.Opcodes
 import java.io.BufferedInputStream
@@ -38,7 +37,7 @@ object TypeUtil {
 
     fun weaveJarTask(input: File, output: File) {
         //input: build\intermediates\runtime_library_classes\debug\classes.jar
-        //output: build\intermediates\transforms\ModuleTransformKt\debug\0.jar
+        //output: build\intermediates\transforms\ScannerComponentTransformKt\debug\0.jar
         KLogger.e("input: ${input.absolutePath}  output: ${output.absolutePath}")
         var zipOutputStream: ZipOutputStream? = null
         var zipFile: ZipFile? = null

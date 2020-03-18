@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'moduleComponent'
 
-componentConfig {
+componentExt {
     matcherInterfaceType "com.github.plugin.common.IComponent"
     matcherManagerTypeMethod "initComponent"
     matcherManagerType "com.github.plugin.common.InjectManager"

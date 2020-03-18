@@ -1,6 +1,6 @@
 package com.github.plugin.asm
 
-import com.github.plugin.ScanerCollections
+import com.github.plugin.ComponentNameCollection
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -13,7 +13,7 @@ class CustomComponentClassVisitor(classVisitor: ClassVisitor?) : ClassVisitor(Op
     override fun visit(version: Int, access: Int, name: String?, signature: String?, superName: String?, interfaces: Array<out String>?) {
         super.visit(version, access, name, signature, superName, interfaces)
         injectClass = interfaces?.contains(MATCH_CLASS) ?: false
-        if (injectClass && name != "") ScanerCollections.add(name ?: "")
+        if (injectClass && name != "") ComponentNameCollection.add(name ?: "")
     }
 
     override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?): MethodVisitor {

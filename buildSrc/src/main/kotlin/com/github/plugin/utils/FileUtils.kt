@@ -1,6 +1,5 @@
 package com.github.plugin.utils
 
-import com.github.plugin.KLogger
 import com.google.common.hash.Hashing
 import java.io.Closeable
 import java.io.File

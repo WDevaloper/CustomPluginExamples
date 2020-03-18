@@ -1,12 +1,12 @@
-package com.github.plugin.inject
+package com.github.plugin.transforms
 
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.github.plugin.KLogger
 import com.github.plugin.asm.WeaveSingleClass
+import com.github.plugin.utils.KLogger
 import com.github.plugin.utils.TypeUtil
 import com.github.plugin.utils.eachFileRecurse
 import org.apache.commons.codec.digest.DigestUtils
@@ -18,9 +18,9 @@ import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
-class AfterTransform : Transform() {
+class ScannerAfterTransform : Transform() {
     override fun getName(): String {
-        return AfterTransform::class.simpleName ?: ""
+        return "scanner_component_after"
     }
 
     override fun getInputTypes(): MutableSet<QualifiedContent.ContentType> {
@@ -37,7 +37,7 @@ class AfterTransform : Transform() {
 
 
     override fun transform(transformInvocation: TransformInvocation) {
-        KLogger.e(">>>>>>>>>>>>>AfterTransform")
+        KLogger.e(">>>>>>>>>>>>>ScannerAfterTransform")
 
         if (!transformInvocation.isIncremental) {
             transformInvocation.outputProvider.deleteAll()
@@ -48,7 +48,7 @@ class AfterTransform : Transform() {
 
 
             input.directoryInputs.forEach { dirInput ->
-                //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ModuleTransformKt\debug\0目录中
+                //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ScannerComponentTransformKt\debug\0目录中
                 val dest = transformInvocation.outputProvider.getContentLocation(DigestUtils.md5Hex(dirInput.name),
                         dirInput.contentTypes,
                         dirInput.scopes,
@@ -111,7 +111,7 @@ class AfterTransform : Transform() {
                             jarInput.contentTypes, jarInput.scopes, Format.JAR)
 
                     //input: build\intermediates\runtime_library_classes\debug\classes.jar
-                    //output: build\intermediates\transforms\ModuleTransformKt\debug\0.jar
+                    //output: build\intermediates\transforms\ScannerComponentTransformKt\debug\0.jar
                     //KLogger.e("input: ${jarInput.file.absolutePath}  output: ${dest.absolutePath}")
                     //KLogger.e("${jarInput.name}   $jarName     ${jarName + md5Name}")
 
