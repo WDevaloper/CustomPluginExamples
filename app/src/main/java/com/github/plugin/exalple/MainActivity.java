@@ -18,6 +18,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        
         InjectManager.getInstance().getComponents().forEach(IComponent::onCreate);
         InjectManager.getInstance().getComponents().forEach(IComponent::onLow);
     }
