@@ -40,6 +40,8 @@ class ModuleTransformKt : Transform() {
 
 
             input.directoryInputs.forEach { dirInput ->
+
+
                 //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ModuleTransformKt\debug\0目录中
                 val dest = transformInvocation.outputProvider.getContentLocation(dirInput.name,
                         dirInput.contentTypes,
@@ -51,40 +53,32 @@ class ModuleTransformKt : Transform() {
                 //3、然后将这些修改过的文件，复制到transforms的输出目录，那么为什么将这些修改过的文件放到transforms，
                 // 就会被打包到apk中呢？因为我们自定义的transforms会优先于其他transform执行并且是优先于其他的执行，详细的
                 //可以去看看BaseExtension的构造方法
-                dirInput.file.eachFileRecurse { file ->
-                    // dest===> transforms\ModuleTransformKt\debug\0 D8编译成dex文件
-                    // file===> build\intermediates\javac\debug\compileDebugJavaWithJavac\classes\com\github\plugin\exalple\MainActivity.class javac 编译生成的字节码
+                if (dirInput.file.isDirectory) {
+                    dirInput.file.eachFileRecurse { file ->
+                        // dest===> transforms\ModuleTransformKt\debug\0 D8编译成dex文件
+                        // file===> build\intermediates\javac\debug\compileDebugJavaWithJavac\classes\com\github\plugin\exalple\MainActivity.class javac 编译生成的字节码
 
 
-                    //现在来认证一下，通过asm修改的字节码，是否在javac 或 transforms中？
-                    //确实会存在于transforms目录中，但是javac中不存在
+                        //现在来认证一下，通过asm修改的字节码，是否在javac 或 transforms中？
+                        //确实会存在于transforms目录中，但是javac中不存在
 
-                    KLogger.e("dest: $dest   file: ${file.absolutePath}")
+                        KLogger.e("dest: $dest   file: ${file.absolutePath}")
 
 
-                    // 第一版本========
-                    val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
-                    FileUtils.touch(outputFile)
-
-                    val inputStream = FileInputStream(file)
-                    // 开始织入代码，修改这些文件;
-                    val bytes = if (file.name == "MainActivity.class") {
-                        weaveSingleClassToByteArray(inputStream)//需要织入代码
-                    } else {
-                        //必须这样写，不然在transforms目录中就没有这些文件，如果是处理的目录，可以不能写出去
-                        //但是如果处理的是jar，你就必须得写出去了，不然就相当把Jar给忽略掉了
-                        inputStream.readBytes()
+                        // 开始织入代码，修改这些文件;
+                        if (file.name == "MainActivity.class") {
+                            val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
+                            FileUtils.touch(outputFile)
+                            val inputStream = FileInputStream(file)
+                            val bytes = weaveSingleClassToByteArray(inputStream)//需要织入代码
+                            //修改完毕复制到transforms的输出目录
+                            val fos = FileOutputStream(outputFile)
+                            fos.write(bytes)
+                            fos.close()
+                            inputStream.close()
+                        }
                     }
-
-                    //修改完毕复制到transforms的输出目录
-                    val fos = FileOutputStream(outputFile)
-                    fos.write(bytes)
-                    fos.close()
-                    inputStream.close()
-
                 }
-                //这里和上面的处理是一样的，将目录中的文件复制到dest目录中
-//                FileUtils.copyDirectory(dirInput.file, dest)
             }
         }
     }
@@ -131,18 +125,18 @@ class ModuleTransformKt : Transform() {
 
         override fun onMethodExit(opcode: Int) {
             mv.visitLdcInsn("TAG");
-        mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
-        mv.visitInsn(Opcodes.DUP);
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-        mv.visitLdcInsn("-------> onCreate aaa: ");
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "i", "(Ljava/lang/String;Ljava/lang/String;)I", false);
-        mv.visitInsn(Opcodes.POP);
+            mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
+            mv.visitInsn(Opcodes.DUP);
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+            mv.visitLdcInsn("-------> onCreate aaa: ");
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getSimpleName", "()Ljava/lang/String;", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "android/util/Log", "i", "(Ljava/lang/String;Ljava/lang/String;)I", false);
+            mv.visitInsn(Opcodes.POP);
         }
     }
 }
