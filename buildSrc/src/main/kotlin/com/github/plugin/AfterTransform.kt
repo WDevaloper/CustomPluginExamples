@@ -167,8 +167,13 @@ class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
 
 class CustomScannerMethod(methodVisitor: MethodVisitor?, access: Int, name: String?, descriptor: String?) : AdviceAdapter(Opcodes.ASM7, methodVisitor, access, name, descriptor) {
 
-    override fun onMethodEnter() {
-        KLogger.e("${ScanerCollections.size}")
+    override fun onMethodExit(opcode: Int) {
+        KLogger.e("${ScanerCollections.size}    $opcode")
+
+        mv.visitVarInsn(ALOAD, 0)
+        mv.visitFieldInsn(GETFIELD, PluginConfig.getComponentConfig().matcherManagerType.replace(".", "/"), "components", "Ljava/util/List;")
+        mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "clear", "()V", true)
+
         ScanerCollections.forEach { name ->
             KLogger.e(">><<<>>>>>>${name}")
             //加载this

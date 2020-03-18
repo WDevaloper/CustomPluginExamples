@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InjectManager {
-
-
     private List<IComponent> components;
     private static volatile InjectManager injectManager;
 
@@ -26,7 +24,14 @@ public class InjectManager {
     }
 
 
-    public void initComponent() {
+    public synchronized void initComponent() {
+        components.clear();
+        this.components.add(new IComponent() {
+            @Override
+            public void onCreate() {
+
+            }
+        });
     }
 
 
