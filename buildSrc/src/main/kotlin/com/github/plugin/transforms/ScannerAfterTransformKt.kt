@@ -49,6 +49,7 @@ class ScannerAfterTransformKt : Transform() {
 
             input.directoryInputs.forEach { dirInput ->
                 //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ScannerComponentTransformKt\debug\0目录中
+                // name就是会在__content__.json文件中的name，唯一的,随便取，但是一定要保证唯一
                 val dest = transformInvocation.outputProvider.getContentLocation(DigestUtils.md5Hex(dirInput.name),
                         dirInput.contentTypes,
                         dirInput.scopes,
@@ -110,6 +111,7 @@ class ScannerAfterTransformKt : Transform() {
                     val md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)
                     //截取.jar，即 去掉.jar
                     if (jarName.endsWith(".jar")) jarName = jarName.substring(0, jarName.length - 4)
+                    // name就是会在__content__.json文件中的name，唯一的,随便取，但是一定要保证唯一
                     val dest = transformInvocation.outputProvider.getContentLocation(jarName + md5Name,
                             jarInput.contentTypes, jarInput.scopes, Format.JAR)
 
