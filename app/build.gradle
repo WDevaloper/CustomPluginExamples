@@ -4,8 +4,8 @@ apply plugin: 'moduleComponent'
 
 componentExt {
     matcherInterfaceType "com.github.plugin.common.IComponent"
-    matcherManagerTypeMethod "initComponent"
     matcherManagerType "com.github.plugin.common.InjectManager"
+    matcherManagerTypeMethod "initComponent"
 }
 
 android {

@@ -10,6 +10,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 
+//注意点：1、使用ASM时，一定要注意asm 字节码格式写对，不然很难找到出错的原因
+
+
 //自定义Gradle 插件
 class ModuleComponentPluginKt : Plugin<Project> {
     private lateinit var mProject: Project
