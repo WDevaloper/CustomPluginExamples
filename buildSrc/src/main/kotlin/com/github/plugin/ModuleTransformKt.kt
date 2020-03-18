@@ -47,6 +47,7 @@ class ModuleTransformKt : Transform() {
         transformInvocation.inputs.forEach { input ->
             input.directoryInputs.forEach { dirInput ->
                 //处理完输入文件之后，要把输出给下一个任务,就是在：transforms\ModuleTransformKt\debug\0目录中
+                // name就是会在__content__.json文件中的name，唯一的
                 val dest = transformInvocation.outputProvider.getContentLocation(DigestUtils.md5Hex(dirInput.name),
                         dirInput.contentTypes,
                         dirInput.scopes,
@@ -128,7 +129,7 @@ class ModuleTransformKt : Transform() {
                     // 将临时class文件拷贝到目标dest文件
                     var jarName = jarInput.name//重名名输出文件,因为可能同名,会覆盖
                     val md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)
-                    //截取.jar，即 去掉.jar
+                    //截取.jar，即 去掉.jar       name就是会在__content__.json文件中的name，唯一的
                     if (jarName.endsWith(".jar")) jarName = jarName.substring(0, jarName.length - 4)
                     val dest = transformInvocation.outputProvider.getContentLocation(jarName + md5Name,
                             jarInput.contentTypes, jarInput.scopes, Format.JAR)

@@ -27,12 +27,6 @@ public class InjectManager {
 
 
     public void initComponent() {
-        this.components.add(new IComponent() {
-            @Override
-            public void onCreate() {
-
-            }
-        });
     }
 
 

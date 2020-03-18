@@ -166,6 +166,7 @@ class CustomScannerInjectClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
 
 
     companion object {
+        //坑，你需要注意的类名不要写错了
         const val MATCH_CLASS = "com/github/plugin/common/IComponent"
         const val MATCH_METHOD_INIT_COMPONENT = "initComponent"
     }
