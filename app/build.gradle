@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 apply plugin: 'moduleComponent'
 
@@ -36,4 +38,7 @@ dependencies {
     implementation project(path: ':common')
     implementation project(path: ':usercenter')
     implementation project(path: ':ordercenter')
+}
+repositories {
+    mavenCentral()
 }
