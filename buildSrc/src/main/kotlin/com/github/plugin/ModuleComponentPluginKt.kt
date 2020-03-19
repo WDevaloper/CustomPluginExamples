@@ -20,6 +20,12 @@ import org.gradle.api.logging.Logging
 
 
 /**
+ *
+ * {https://juejin.im/post/5a2b95b96fb9a045284669a9}
+ * {https://www.jianshu.com/p/811b0d0975ef}
+ * {https://www.jianshu.com/p/16ed4d233fd1}
+ * {https://github.com/Qihoo360/ArgusAPM}
+ *
  * Android Gradle Transform API是从Gradle 1.5.0版本之后提供的,它允许第三方在打包Dex文件之前的编译过程中修改java字节码
  * 自定义插件注册的transform会在ProguardTransform和DexTransform之前执行，所以自动注册的类不需要考虑混淆的情况
  *

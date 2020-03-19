@@ -3,7 +3,6 @@ package com.github.plugin.asm
 import com.github.plugin.utils.KLogger
 import com.github.plugin.PluginInitializer
 import com.github.plugin.ComponentNameCollection
-import com.github.plugin.ScannerUtil
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
