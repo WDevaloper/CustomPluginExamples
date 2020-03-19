@@ -42,7 +42,7 @@ class ScannerComponentTransformKt : Transform() {
     }
 
     override fun transform(transformInvocation: TransformInvocation) {
-
+        KLogger.e("${PluginInitializer.getComponentInterfaceName()}   ${PluginInitializer.getComponentManagerTypeInitMethodName()}  ${PluginInitializer.getComponentManagerTypeName()}")
         if (!transformInvocation.isIncremental) {
             transformInvocation.outputProvider.deleteAll()
         }
