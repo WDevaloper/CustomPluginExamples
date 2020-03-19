@@ -5,6 +5,8 @@ import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.github.plugin.PluginInitializer
+import com.github.plugin.ScannerUtil
 import com.github.plugin.asm.WeaveSingleClass
 import com.github.plugin.utils.KLogger
 import com.github.plugin.utils.TypeUtil
