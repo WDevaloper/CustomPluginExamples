@@ -6,6 +6,8 @@ import android.util.Log
 
 import com.github.plugin.common.IComponent
 
+
+//兼容kotlin
 class MainComponentKt : IComponent {
     override fun attachBaseContext(base: Context) {
         Log.e("tag", "MainComponentKt for attachBaseContext method")
