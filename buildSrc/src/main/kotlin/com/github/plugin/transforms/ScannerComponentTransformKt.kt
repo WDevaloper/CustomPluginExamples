@@ -68,9 +68,11 @@ class ScannerComponentTransformKt : Transform() {
                         val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
                         FileUtils.touch(outputFile)
 
-                        //Dest目录: build\intermediates\transforms\ScannerComponentTransformKt\debug\0
-                        //输入文件:  build\intermediates\javac\debug\compileDebugJavaWithJavac\classes\com\github\plugin\examlple\Inject.class
-                        //输出文件： build\intermediates\transforms\ScannerComponentTransformKt\debug\0\com\github\plugin\exalple\Inject.class
+                        // Dest目录: build\intermediates\transforms\ScannerComponentTransformKt\debug\0
+                        // 输入文件:  build\intermediates\javac\debug\compileDebugJavaWithJavac\classes\com\github\plugin\examlple\Inject.class
+                        // 输出文件： build\intermediates\transforms\ScannerComponentTransformKt\debug\0\com\github\plugin\exalple\Inject.class
+                        // build\tmp\kotlin-classes\debug\com\github\plugin\exalple\test\MainComponentKt.class
+                        // build\intermediates\transforms\scanner_component_result\debug\9\com\github\plugin\exalple\test\MainComponentKt.class
                         KLogger.e("inputFile: ${file.absolutePath}   outputFile: ${outputFile.absolutePath}   destFile: ${dest.absolutePath}")
 
                         val inputStream = FileInputStream(file)
@@ -118,7 +120,7 @@ class ScannerComponentTransformKt : Transform() {
                             tmpJarOutputStream.write(updateCodeBytes)
                             KLogger.e("ASM 结束处理Jar文件中${entryName}文件")
                         } else {
-                            KLogger.e("不满足条件Jar文件中${entryName}文件")
+//                            KLogger.e("不满足条件Jar文件中${entryName}文件")
                             tmpJarOutputStream.putNextEntry(zipEntry)
                             tmpJarOutputStream.write(IOUtils.toByteArray(inputStream))
                         }
