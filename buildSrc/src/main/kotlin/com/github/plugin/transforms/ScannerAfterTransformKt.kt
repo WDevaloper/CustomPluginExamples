@@ -92,6 +92,7 @@ class ScannerAfterTransformKt : Transform() {
                         if (TypeUtil.isMatchCondition(entryName)) {
                             KLogger.e("ASM 开始处理Jar文件中${entryName}文件")
                             tmpJarOutputStream.putNextEntry(zipEntry)
+
                             val updateCodeBytes = WeaveSingleClass.weaveSingleClassToByteArrayAutoInject(inputStream)
                             tmpJarOutputStream.write(updateCodeBytes)
                             KLogger.e("ASM 结束处理Jar文件中${entryName}文件")
