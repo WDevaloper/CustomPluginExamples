@@ -28,16 +28,17 @@ class ScannerComponentTransformKt : Transform() {
     }
 
     override fun getInputTypes(): MutableSet<QualifiedContent.ContentType> {
-        return TransformManager.CONTENT_CLASS
-    }
-
-    override fun isIncremental(): Boolean {
-        return false
+        return TransformManager.CONTENT_CLASS//操作字节码
     }
 
     override fun getScopes(): MutableSet<in QualifiedContent.Scope> {
-        return TransformManager.SCOPE_FULL_PROJECT
+        return TransformManager.SCOPE_FULL_PROJECT//范围
     }
+
+    override fun isIncremental(): Boolean {
+        return false//是否增量更新
+    }
+
 
     override fun transform(transformInvocation: TransformInvocation) {
         KLogger.e("${PluginInitializer.getComponentInterfaceName()}   ${PluginInitializer.getComponentManagerTypeInitMethodName()}  ${PluginInitializer.getComponentManagerTypeName()}")
@@ -138,6 +139,7 @@ class ScannerComponentTransformKt : Transform() {
                     if (jarName.endsWith(".jar")) jarName = jarName.substring(0, jarName.length - 4)
                     val dest = transformInvocation.outputProvider.getContentLocation(jarName + md5Name,
                             jarInput.contentTypes, jarInput.scopes, Format.JAR)
+
 
                     //input: build\intermediates\runtime_library_classes\debug\classes.jar
                     //                    //output: build\intermediates\transforms\ScannerComponentTransformKt\debug\0.jar
