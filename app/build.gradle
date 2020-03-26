@@ -38,6 +38,7 @@ dependencies {
     implementation project(path: ':common')
     implementation project(path: ':usercenter')
     implementation project(path: ':ordercenter')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }
 repositories {
     mavenCentral()
