@@ -6,7 +6,7 @@ apply plugin: 'maven'
 
 //配置发布版本----------satrt----------
 //配置版本
-version = "1.0.2"
+version = "1.0.3"
 group = "com.github.plugin"         //todo Maven Group ID for the artifact，一般填你唯一的包名
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -97,3 +97,10 @@ bintray {
         publish = true
     }
 }
+
+//使用：
+//还没有审核通过的使用方式
+//在主gradle中添加：
+// 1、maven { url 'https://dl.bintray.com/develop-fayou/wangfayou-plugin' }
+// 2、classpath 'com.github.plugin:buildSrc:1.0.2'
+//在app gradle中添加：apply plugin: 'moduleComponent'
