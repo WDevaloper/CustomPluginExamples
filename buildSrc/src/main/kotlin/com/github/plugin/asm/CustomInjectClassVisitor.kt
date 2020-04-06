@@ -20,7 +20,9 @@ class CustomMethodVisitor(methodVisitor: MethodVisitor?, access: Int, name: Stri
     private var isInjectMethod = false
 
     override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor {
-        if (MATCH_INJECT_ANNOTATION == descriptor) isInjectMethod = true
+//        if (MATCH_INJECT_ANNOTATION == descriptor) isInjectMethod = true
+        //适配无法识别kotlin
+        isInjectMethod = isInjectMethod or (descriptor == "Lcom/github/plugin/exalple/Inject;")
         return super.visitAnnotation(descriptor, visible)
     }
 
@@ -60,10 +62,6 @@ class CustomMethodVisitor(methodVisitor: MethodVisitor?, access: Int, name: Stri
             mv.visitInsn(Opcodes.POP)
             isInjectMethod = false
         }
-    }
-
-    companion object {
-        private const val MATCH_INJECT_ANNOTATION = "Lcom/github/plugin/exalple/Inject;"
     }
 }
 

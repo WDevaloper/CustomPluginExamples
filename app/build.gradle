@@ -1,6 +1,28 @@
+import com.android.build.gradle.AppExtension
+
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 apply plugin: 'moduleComponent'
+
+
+class MyPlugin implements Plugin<Project> {
+    @Override
+    void apply(Project target) {
+        target.logger.error(">>>>>>>>>>>>my plugin")
+        def appExtension = target.extensions.getByType(AppExtension)
+        appExtension.applicationVariants.each { app ->
+            app.packageApplicationProvider.get().outputDirectory = new File("E:\\apkOutPut")
+            app.packageApplicationProvider.get().outputScope.apkDatas.forEach { data ->
+                data.outputFileName = "youbesun-sale-${versionName}-${buildType}.apk"
+            }
+        }
+    }
+}
+
+
+apply plugin: MyPlugin
 
 componentExt {
     matcherInterfaceType "com.github.plugin.common.IComponent"
@@ -36,4 +58,8 @@ dependencies {
     implementation project(path: ':common')
     implementation project(path: ':usercenter')
     implementation project(path: ':ordercenter')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+}
+repositories {
+    mavenCentral()
 }

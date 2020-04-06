@@ -90,13 +90,11 @@ class ScannerAfterTransformKt : Transform() {
                         val inputStream = jarFile.getInputStream(jarEntry)
                         //插桩class
                         if (TypeUtil.isMatchCondition(entryName)) {
-                            KLogger.e("ASM 开始处理Jar文件中${entryName}文件")
                             tmpJarOutputStream.putNextEntry(zipEntry)
                             val updateCodeBytes = WeaveSingleClass.weaveSingleClassToByteArrayAutoInject(inputStream)
                             tmpJarOutputStream.write(updateCodeBytes)
-                            KLogger.e("ASM 结束处理Jar文件中${entryName}文件")
                         } else {
-                            KLogger.e("不满足条件Jar文件中${entryName}文件")
+//                            KLogger.e("不满足条件Jar文件中${entryName}文件")
                             tmpJarOutputStream.putNextEntry(zipEntry)
                             tmpJarOutputStream.write(IOUtils.toByteArray(inputStream))
                         }
