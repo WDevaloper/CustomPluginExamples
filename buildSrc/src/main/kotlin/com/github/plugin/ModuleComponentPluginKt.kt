@@ -49,7 +49,7 @@ class ModuleComponentPluginKt : Plugin<Project> {
             //主要操作就是收集满足条件的类
             android.registerTransform(ScannerComponentTransformKt())
             //收集完毕，在这里完成代码的织入
-            android.registerTransform(ScannerAfterTransformKt())
+//            android.registerTransform(ScannerAfterTransformKt())
             project.gradle.buildFinished {
                 KLogger.e("buildFinished")
             }

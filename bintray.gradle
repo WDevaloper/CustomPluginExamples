@@ -10,7 +10,7 @@ version = "1.0.3"
 group = "com.github.plugin"         //todo Maven Group ID for the artifact，一般填你唯一的包名
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    getArchiveClassifier().set('sources')
     from sourceSets.main.allSource
 }
 //配置发布版本----------end----------
@@ -65,7 +65,7 @@ tasks.withType(JavaCompile) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    getArchiveClassifier().set('javadoc')
     from javadoc.destinationDir
 }
 

@@ -32,6 +32,24 @@ class CustomPlugin implements Plugin<Project> {
 }
 
 
+
+class MyPlugin implements Plugin<Project> {
+    @Override
+    void apply(Project target) {
+        target.logger.error(">>>>>>>>>>>>my plugin")
+        def appExtension = target.extensions.getByType(AppExtension)
+        appExtension.applicationVariants.each { app ->
+            app.packageApplicationProvider.get().outputDirectory = new File("E:\\apkOutPut")
+            app.packageApplicationProvider.get().outputScope.apkDatas.forEach { data ->
+                data.outputFileName = "youbesun-sale-${versionName}-${buildType}.apk"
+            }
+        }
+    }
+}
+
+
+apply plugin: MyPlugin
+
 componentExt {
     matcherInterfaceType "com.github.plugin.common.IComponent"
     matcherManagerType "com.github.plugin.common.InjectManager"
@@ -76,7 +94,7 @@ android {
 
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':common')
     implementation project(path: ':usercenter')
     implementation project(path: ':ordercenter')
