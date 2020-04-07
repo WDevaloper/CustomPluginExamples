@@ -32,6 +32,7 @@ public class App extends Application {
     @Override
     public void onLowMemory() {
         super.onLowMemory();
+
         for (IComponent component : InjectManager.getInstance().getComponents()) {
             component.onLowMemory();
         }

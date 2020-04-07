@@ -1,8 +1,36 @@
+import com.android.build.gradle.AppExtension
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 apply plugin: 'moduleComponent'
+apply plugin: CustomPlugin
+
+
+class CustomPlugin implements Plugin<Project> {
+    @Override
+    void apply(Project target) {
+        target.logger.error(">>>>>>>>>>>CustomPlugin")
+
+
+        def android = target.extensions.getByType(AppExtension)
+//
+//        android.applicationVariants.all { variant ->
+//            variant.outputs.all {
+//                def buildType = variant.buildType.name
+//                if (variant.buildType.name == "release") {
+//                    def versionName = variant.versionName
+//                    variant.packageApplicationProvider.get().outputDirectory = new File("E:\\test")
+//                    variant.packageApplicationProvider.get().outputScope.apkDatas.forEach {
+//                        apkData -> apkData.outputFileName = "youbesun-sale-${versionName}-${buildType}.apk"
+//                    }
+//                }
+//            }
+//        }
+    }
+}
+
 
 componentExt {
     matcherInterfaceType "com.github.plugin.common.IComponent"
@@ -26,6 +54,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            def buildType = variant.buildType.name
+            if (variant.buildType.name == "release") {
+                def versionName = variant.versionName
+                variant.packageApplicationProvider.get().outputDirectory = new File("E:\\apkOutPut")
+                variant.packageApplicationProvider.get().outputScope.apkDatas.forEach {
+                    apkData -> apkData.outputFileName = "youbesun${versionName}-${buildType}.apk"
+                }
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
