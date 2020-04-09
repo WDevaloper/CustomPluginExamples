@@ -32,7 +32,6 @@ class CustomPlugin implements Plugin<Project> {
 }
 
 
-
 class MyPlugin implements Plugin<Project> {
     @Override
     void apply(Project target) {
@@ -54,6 +53,19 @@ componentExt {
     matcherInterfaceType "com.github.plugin.common.IComponent"
     matcherManagerType "com.github.plugin.common.InjectManager"
     matcherManagerTypeMethod "initComponent"
+}
+
+
+moduleCP {
+    exclude 'leakcanary.internal'
+    exclude 'com.squareup'
+    exclude 'com.alipay'
+    exclude 'androidx'
+    exclude 'javax'
+    exclude 'org.jetbrains.kotlin'
+    exclude 'org.jetbrains.kotlinx'
+    exclude 'kotlin'
+    exclude 'android.support'
 }
 
 android {

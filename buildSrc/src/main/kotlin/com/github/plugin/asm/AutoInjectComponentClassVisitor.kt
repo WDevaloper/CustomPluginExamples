@@ -16,14 +16,4 @@ class AutoInjectComponentClassVisitor(classVisitor: ClassVisitor) : ClassVisitor
         }
         super.visit(version, access, name, signature, superName, interfaces)
     }
-
-    override fun visitMethod(access: Int, name: String, descriptor: String, signature: String?, exceptions: Array<out String>?): MethodVisitor {
-        KLogger.e("name:$name     descriptor:$descriptor")
-
-        val visitMethod = super.visitMethod(access, name, descriptor, signature, exceptions)
-        if (PluginInitializer.getComponentManagerTypeInitMethodName() != name) {
-            return visitMethod
-        }
-        return AutoInjectComponentMethodVisitor(visitMethod, access, name, descriptor)
-    }
 }

@@ -1,5 +1,6 @@
 package com.github.plugin.utils
 
+import com.github.plugin.PluginInitializer
 import com.github.plugin.asm.WeaveSingleClass
 import org.objectweb.asm.Opcodes
 import java.io.BufferedInputStream
@@ -19,21 +20,12 @@ import java.util.zip.ZipOutputStream
 object TypeUtil {
 
     fun isMatchCondition(name: String): Boolean {
-        return name.endsWith(".class") && !name.contains("R$")
-                && !name.contains("R.class") && !name.contains("BuildConfig.class")
+        return name.endsWith(".class")
+                && !name.contains("R$")
+                && !name.contains("R.class")
+                && !name.contains("BuildConfig.class")
+                && !PluginInitializer.getExclude().getExcludes().asSequence().any { name.startsWith(it) }
     }
-
-    private fun isNeedVisit(access: Int): Boolean {
-        //不对抽象方法、native方法、桥接方法、合成方法进行织入
-        if (access and Opcodes.ACC_ABSTRACT !== 0
-                || access and Opcodes.ACC_NATIVE !== 0
-                || access and Opcodes.ACC_BRIDGE !== 0
-                || access and Opcodes.ACC_SYNTHETIC !== 0) {
-            return false
-        }
-        return true
-    }
-
 
     fun weaveJarTask(input: File, output: File) {
         //input: build\intermediates\runtime_library_classes\debug\classes.jar

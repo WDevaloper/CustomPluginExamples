@@ -46,6 +46,34 @@ class ModuleComponentPluginKt : Plugin<Project> {
             // 监听每个任务的执行时间
             project.gradle.addListener(BuildTimeListener())
             val android = project.extensions.getByType(AppExtension::class.java)
+
+            //获取签名配置：会有多个签名
+            KLogger.e("signingConfigs----------------start")
+            android.signingConfigs.forEach {
+                KLogger.e("name: ${it.name}")
+                KLogger.e("isV1SigningEnabled: ${it.isV1SigningEnabled}")
+                KLogger.e("isV2SigningEnabled: ${it.isV2SigningEnabled}")
+                KLogger.e("isSigningReady: ${it.isSigningReady}")
+                KLogger.e("storePassword: ${it.storePassword}")
+                KLogger.e("storeFile: ${it.storeFile.absolutePath}")
+                KLogger.e("storeType: ${it.storeType}")
+                KLogger.e("keyAlias: ${it.keyAlias}")
+                KLogger.e("keyPassword: ${it.keyPassword}")
+            }
+            KLogger.e("signingConfigs----------------end")
+
+
+//            android.applicationVariants.forEach {
+////                it.outputs.all {
+////                    it.outputFile
+////                }
+////            }
+
+
+            //这里拿不到extensions
+//            KLogger.e("excludes>>>>>${PluginInitializer.getExclude()}")
+
+
             //主要操作就是收集满足条件的类
             android.registerTransform(ScannerComponentTransformKt())
             //收集完毕，在这里完成代码的织入

@@ -19,7 +19,6 @@ import com.github.plugin.exalple.test.TestInjejct;
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
 
-
     MyVisibility myVisibility = new MyVisibility();
     TextView textView;
 

@@ -59,7 +59,7 @@ class ScannerAfterTransformKt : Transform() {
                         val outputFile = File(file.absolutePath.replace(dirInput.file.absolutePath, dest.absolutePath))
                         FileUtils.touch(outputFile)
                         val inputStream = FileInputStream(file)
-                        val bytes = WeaveSingleClass.weaveSingleClassToByteArrayAutoInject(inputStream)//需要织入代码
+                        val bytes = WeaveSingleClass.scannerAndCollectionComponentClassName(inputStream)//需要织入代码
                         val fos = FileOutputStream(outputFile)
                         fos.write(bytes)
                         fos.close()
@@ -91,7 +91,7 @@ class ScannerAfterTransformKt : Transform() {
                         //插桩class
                         if (TypeUtil.isMatchCondition(entryName)) {
                             tmpJarOutputStream.putNextEntry(zipEntry)
-                            val updateCodeBytes = WeaveSingleClass.weaveSingleClassToByteArrayAutoInject(inputStream)
+                            val updateCodeBytes = WeaveSingleClass.scannerAndCollectionComponentClassName(inputStream)
                             tmpJarOutputStream.write(updateCodeBytes)
                         } else {
 //                            KLogger.e("不满足条件Jar文件中${entryName}文件")
